@@ -20,6 +20,6 @@ steps:
       token:
         from_secret: COVERAGE_TOKEN
       files:
-        - *.xml
+        - report.xml
       paths:
         - build/jacoco
