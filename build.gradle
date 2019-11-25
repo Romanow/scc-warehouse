@@ -43,7 +43,7 @@ publishing {
     publications {
         stubs(MavenPublication) {
             artifact verifierStubsJar
-            artifactId project.name
+            artifactId "warehouse"
         }
     }
 }
