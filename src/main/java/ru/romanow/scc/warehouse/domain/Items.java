@@ -13,7 +13,6 @@ import java.util.UUID;
 @Accessors(chain = true)
 @Entity
 @Table(name = "items",
-        schema = "warehouse",
         indexes = {
                 @Index(name = "idx_items_uid", columnList = "uid", unique = true),
                 @Index(name = "idx_items_name", columnList = "name", unique = true)

@@ -14,7 +14,6 @@ import java.util.UUID;
 @Accessors(chain = true)
 @Entity
 @Table(name = "order_items",
-        schema = "warehouse",
         indexes = @Index(name = "idx_order_items_order_uid", columnList = "order_uid", unique = true))
 public class OrderItems {
 
