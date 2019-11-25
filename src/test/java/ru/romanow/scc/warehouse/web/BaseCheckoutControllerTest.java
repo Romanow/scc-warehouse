@@ -1,0 +1,43 @@
+package ru.romanow.scc.warehouse.web;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.romanow.scc.warehouse.domain.enums.OrderState;
+import ru.romanow.scc.warehouse.service.WarehouseService;
+
+import javax.persistence.EntityNotFoundException;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static ru.romanow.scc.warehouse.web.TestHelper.buildOrderItemResponse;
+
+public class BaseCheckoutControllerTest
+        extends BaseWebTest {
+    private static final UUID ORDER_UID = UUID.fromString("1a1f775c-4f31-4256-bec1-c3d4e9bf1b52");
+    private static final int ITEMS_SIZE = 2;
+
+    @Autowired
+    private WarehouseController warehouseController;
+
+    @MockBean
+    private WarehouseService warehouseService;
+
+    @BeforeEach
+    public void init() {
+        when(warehouseService.checkout(any(UUID.class))).thenAnswer((i) -> {
+            final UUID orderUid = i.getArgument(0);
+            throw new EntityNotFoundException(format("OrderItem '%s' not found", orderUid));
+        });
+        when(warehouseService.checkout(eq(ORDER_UID)))
+                .thenReturn(buildOrderItemResponse(ORDER_UID, OrderState.READY_FOR_DELIVERY, ITEMS_SIZE));
+    }
+
+    @Override
+    protected Object controller() {
+        return warehouseController;
+    }
+}

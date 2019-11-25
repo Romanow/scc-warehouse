@@ -1,0 +1,106 @@
+plugins {
+    id "java"
+    id "idea"
+    id "jacoco"
+    id "maven-publish"
+    id "com.jfrog.bintray" version "1.8.4"
+    id "org.asciidoctor.gradle.asciidoctor" version "1.5.1"
+    id "org.springframework.boot" version "2.1.7.RELEASE"
+    id "io.spring.dependency-management" version "1.0.5.RELEASE"
+    id "org.springframework.cloud.contract" version "2.1.4.RELEASE"
+}
+
+apply from: "libraries.gradle"
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+publishing {
+    publications {
+        stubs(MavenPublication) {
+            artifact verifierStubsJar
+            artifactId project.name
+        }
+    }
+}
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_TOKEN")
+    publications = ['stubs']
+    publish = true
+    pkg {
+        repo = 'scc-microservices'
+        name = 'warehouse'
+    }
+}
+
+contracts {
+    baseClassMappings {
+        baseClassMapping ".*items.*", "ru.romanow.scc.warehouse.web.BaseItemsControllerTest"
+        baseClassMapping ".*state.*", "ru.romanow.scc.warehouse.web.BaseStateControllerTest"
+        baseClassMapping ".*checkout.*", "ru.romanow.scc.warehouse.web.BaseCheckoutControllerTest"
+        baseClassMapping ".*takeItems.*", "ru.romanow.scc.warehouse.web.BaseTakeItemControllerTest"
+    }
+    basePackageForTests = "ru.romanow.scc.warehouse.web"
+    testFramework = "JUNIT5"
+}
+
+dependencies {
+    // Spring
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+
+    // DB
+    implementation "org.postgresql:postgresql"
+    implementation "org.flywaydb:flyway-core"
+
+    // Common
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+
+    // Utils
+    compileOnly "com.google.code.findbugs:jsr305:${findBugsVersion}"
+    implementation "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Test
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+
+    testImplementation "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    testImplementation "org.springframework.cloud:spring-cloud-contract-spec:${springContractVersion}"
+    testImplementation "org.springframework.cloud:spring-cloud-starter-contract-verifier:${springContractVersion}"
+}
+
+bootJar {
+    archiveFileName = "warehouse.jar"
+}
