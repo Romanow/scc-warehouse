@@ -14,6 +14,22 @@ steps:
     commands:
       - gradle clean compileJava test jacocoTestReport --info
 
+  - name: trigger
+    image: plugins/downstream
+    settings:
+      server: https://cloud.drone.io
+      token:
+        from_secret: DRONE_TOKEN
+      fork: true
+      repositories:
+        - Romanow/scc-delivery
+        - Romanow/scc-orders
+    trigger:
+      branch:
+        - master
+      event:
+        - push
+
   - name: coverage
     image: plugins/codecov
     settings:
@@ -23,3 +39,4 @@ steps:
         - report.xml
       paths:
         - build/reports/jacoco
+      verbose: true
