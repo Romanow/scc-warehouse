@@ -1,154 +1,107 @@
-package ru.romanow.scc.warehouse.service;
+package ru.romanow.warehouse.service
 
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.romanow.scc.warehouse.domain.Items;
-import ru.romanow.scc.warehouse.domain.OrderItems;
-import ru.romanow.scc.warehouse.domain.enums.OrderState;
-import ru.romanow.scc.warehouse.exceptions.EntityAvailableException;
-import ru.romanow.scc.warehouse.exceptions.OrderItemAlreadyExistsException;
-import ru.romanow.scc.warehouse.model.*;
-import ru.romanow.scc.warehouse.repository.ItemsRepository;
-import ru.romanow.scc.warehouse.repository.OrderItemsRepository;
-
-import javax.annotation.Nonnull;
-import javax.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.UUID;
-
-import static com.google.common.base.Joiner.on;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.springframework.data.domain.PageRequest.of;
-import static org.springframework.data.domain.Pageable.unpaged;
+import com.google.common.base.Joiner.on
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import ru.romanow.warehouse.domain.Items
+import ru.romanow.warehouse.domain.OrderItems
+import ru.romanow.warehouse.domain.enums.OrderState
+import ru.romanow.warehouse.exceptions.EntityAvailableException
+import ru.romanow.warehouse.exceptions.OrderItemAlreadyExistsException
+import ru.romanow.warehouse.model.*
+import ru.romanow.warehouse.repository.ItemsRepository
+import ru.romanow.warehouse.repository.OrderItemsRepository
+import java.util.*
+import javax.persistence.EntityNotFoundException
 
 @Service
-@RequiredArgsConstructor
-public class WarehouseServiceImpl
-        implements WarehouseService {
-    private static final Logger logger = LoggerFactory.getLogger(WarehouseServiceImpl.class);
+class WarehouseServiceImpl(
+    private val itemsRepository: ItemsRepository,
+    private val orderItemsRepository: OrderItemsRepository
+) : WarehouseService {
 
-    private final ItemsRepository itemsRepository;
-    private final OrderItemsRepository orderItemsRepository;
-
-    @Nonnull
-    @Override
     @Transactional(readOnly = true)
-    public OrderItems getOrderByUid(@Nonnull UUID orderUid) {
-        return orderItemsRepository.findByOrderUid(orderUid)
-                .orElseThrow(() -> new EntityNotFoundException(format("OrderItem '%s' not found", orderUid)));
+    override fun getOrderByUid(orderUid: UUID): OrderItems {
+        return orderItemsRepository
+            .findByOrderUid(orderUid)
+            .orElseThrow { EntityNotFoundException("OrderItem '$orderUid' not found") }
     }
 
-    @Nonnull
-    @Override
     @Transactional(readOnly = true)
-    public PageableItemsResponse items(@Nonnull Integer page, @Nonnull Integer size) {
-        final Pageable pageable = size > 0 ? of(page, size) : unpaged();
-        final Page<Items> items = itemsRepository.findAll(pageable);
-        return new PageableItemsResponse()
-                .setPage(page)
-                .setPageSize(size)
-                .setTotalSize((int) items.getTotalElements())
-                .setItems(items.getContent()
-                        .stream()
-                        .map(this::buildItemsFullInfoResponse)
-                        .collect(toList()));
+    override fun items(pageable: Pageable): PageableItemsResponse {
+        val items = itemsRepository
+            .findAll({ root, query, criteriaBuilder -> criteriaBuilder.greaterThan(root.get("count"), 0) }, pageable)
+        return PageableItemsResponse(
+            page = pageable.pageNumber,
+            pageSize = pageable.pageSize,
+            totalSize = items.totalElements.toInt(),
+            items = items.content.map { buildItemsFullInfoResponse(it) }
+        )
     }
 
-    @Nonnull
-    @Override
     @Transactional(readOnly = true)
-    public OrderItemResponse orderItemState(@Nonnull UUID orderUid) {
-        final OrderItems orderItems = getOrderByUid(orderUid);
-        return buildOrderItemsResponse(orderItems);
+    override fun orderItemState(orderUid: UUID): OrderItemResponse {
+        val orderItems = getOrderByUid(orderUid)
+        return buildOrderItemsResponse(orderItems)
     }
 
-    @Nonnull
-    @Override
     @Transactional
-    public OrderItemResponse takeItems(@Nonnull UUID orderUid, @Nonnull TakeItemsRequest request) {
-        if (orderItemsRepository.findByOrderUid(orderUid).isPresent()) {
-            throw new OrderItemAlreadyExistsException(format("OrderItem '%s' already exists", orderUid));
+    override fun takeItems(orderUid: UUID, request: TakeItemsRequest): OrderItemResponse {
+        if (orderItemsRepository.findByOrderUid(orderUid).isPresent) {
+            throw OrderItemAlreadyExistsException("OrderItem '$orderUid' already exists")
         }
-
-        final List<UUID> itemUids = request.getItemsUid();
-        final List<Items> items = itemsRepository.findByUids(itemUids);
-        if (items.size() != itemUids.size()) {
-            throw new EntityNotFoundException(format("Not all items [%s] found", on(",").join(itemUids)));
+        val itemUids = request.itemsUid!!
+        val items: List<Items> = itemsRepository.findByUids(itemUids)
+        if (items.size != itemUids.size) {
+            throw EntityNotFoundException("Not all items [${on(",").join(itemUids)}] found")
         }
-
-        final List<Items> absentItems = items.stream().filter(item -> item.getCount() == 0).collect(toUnmodifiableList());
-        if (absentItems.size() != 0) {
-            throw new EntityAvailableException(format("Items [%s] is empty (available count = 0)", on(",").join(absentItems)));
+        val absentItems = items.filter { it.count == 0 }
+        if (absentItems.isNotEmpty()) {
+            throw EntityAvailableException("Items [${on(",").join(absentItems)}] is empty (available count = 0)")
         }
-
-        OrderItems orderItems = new OrderItems()
-                .setState(OrderState.CREATED)
-                .setOrderUid(orderUid)
-                .setItems(items);
-
-        orderItems = orderItemsRepository.save(orderItems);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Create orderItems '{}'", orderItems);
-        }
-
-        items.forEach(item -> {
-            item.decrementCount();
-            itemsRepository.save(item);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Update count on item '{}'", item);
-            }
-        });
-
-        return buildOrderItemsResponse(orderItems);
+        var orderItems = OrderItems(
+            state = OrderState.CREATED,
+            orderUid = orderUid,
+            items = items
+        )
+        orderItems = orderItemsRepository.save(orderItems)
+        logger.info("Create orderItems '{}'", orderItems)
+        items.forEach { it.decrementCount() }
+        return buildOrderItemsResponse(orderItems)
     }
 
-    @Nonnull
-    @Override
     @Transactional
-    public OrderItemResponse checkout(@Nonnull UUID orderUid) {
-        final OrderItems orderItems = getOrderByUid(orderUid);
-        orderItems.setState(OrderState.READY_FOR_DELIVERY);
-        orderItemsRepository.save(orderItems);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Update orderItem state: {}, '{}'", OrderState.READY_FOR_DELIVERY, orderItems);
-        }
-        return buildOrderItemsResponse(orderItems);
+    override fun checkout(orderUid: UUID): OrderItemResponse {
+        val orderItems: OrderItems = getOrderByUid(orderUid)
+        orderItems.state = OrderState.READY_FOR_DELIVERY
+        logger.info("Update orderItem state: {}, '{}'", OrderState.READY_FOR_DELIVERY, orderItems)
+        return buildOrderItemsResponse(orderItems)
     }
 
-    @Nonnull
-    private ItemsFullInfoResponse buildItemsFullInfoResponse(@Nonnull Items items) {
-        final ItemsFullInfoResponse response = new ItemsFullInfoResponse();
-        response.setCount(items.getCount())
-                .setItemUid(items.getUid())
-                .setName(items.getName());
-        return response;
-    }
 
-    @Nonnull
-    private ItemsShortInfo buildItemsShortInfoResponse(@Nonnull Items item) {
-        return new ItemsShortInfo()
-                .setName(item.getName())
-                .setItemUid(item.getUid());
-    }
+    private fun buildItemsFullInfoResponse(item: Items) =
+        ItemsFullInfoResponse(
+            count = item.count,
+            itemUid = item.uid,
+            name = item.name
+        )
 
-    @Nonnull
-    private OrderItemResponse buildOrderItemsResponse(@Nonnull OrderItems orderItems) {
-        final List<ItemsShortInfo> items = orderItems.getItems()
-                .stream()
-                .map(this::buildItemsShortInfoResponse)
-                .collect(toList());
+    private fun buildItemsShortInfoResponse(item: Items) =
+        ItemsShortInfo(
+            itemUid = item.uid,
+            name = item.name
+        )
 
-        return new OrderItemResponse()
-                .setState(orderItems.getState())
-                .setOrderUid(orderItems.getOrderUid())
-                .setItems(items);
+    private fun buildOrderItemsResponse(orderItems: OrderItems) =
+        OrderItemResponse(
+            state = orderItems.state,
+            orderUid = orderItems.orderUid,
+            items = orderItems.items?.map { buildItemsShortInfoResponse(it) }
+        )
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(WarehouseServiceImpl::class.java)
     }
 }

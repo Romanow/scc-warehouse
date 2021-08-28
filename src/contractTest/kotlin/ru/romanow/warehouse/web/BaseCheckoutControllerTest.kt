@@ -1,43 +1,35 @@
-package ru.romanow.scc.warehouse.web;
+package ru.romanow.warehouse.web
 
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import ru.romanow.scc.warehouse.domain.enums.OrderState;
-import ru.romanow.scc.warehouse.service.WarehouseService;
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
+import ru.romanow.warehouse.domain.Items
+import ru.romanow.warehouse.domain.OrderItems
+import ru.romanow.warehouse.domain.enums.OrderState
+import ru.romanow.warehouse.repository.ItemsRepository
+import ru.romanow.warehouse.repository.OrderItemsRepository
 
-import javax.persistence.EntityNotFoundException;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static ru.romanow.scc.warehouse.web.TestHelper.buildOrderItemResponse;
-
-public class BaseCheckoutControllerTest
-        extends BaseWebTest {
-    private static final UUID ORDER_UID = UUID.fromString("1a1f775c-4f31-4256-bec1-c3d4e9bf1b52");
-    private static final int ITEMS_SIZE = 2;
+class BaseCheckoutControllerTest : BaseContractTest() {
 
     @Autowired
-    private WarehouseController warehouseController;
+    private lateinit var itemsRepository: ItemsRepository
 
-    @MockBean
-    private WarehouseService warehouseService;
+    @Autowired
+    private lateinit var orderItemsRepository: OrderItemsRepository
 
     @BeforeEach
-    public void init() {
-        when(warehouseService.checkout(any(UUID.class))).thenAnswer((i) -> {
-            final UUID orderUid = i.getArgument(0);
-            throw new EntityNotFoundException(format("OrderItem '%s' not found", orderUid));
-        });
-        when(warehouseService.checkout(eq(ORDER_UID)))
-                .thenReturn(buildOrderItemResponse(ORDER_UID, OrderState.READY_FOR_DELIVERY, ITEMS_SIZE));
-    }
+    fun init() {
+        val items = itemsRepository.saveAll(
+            listOf(
+                Items(uid = legoTechnic42082ItemUid, name = legoTechnic42082Name, count = 2),
+                Items(uid = legoTechnic42115ItemUid, name = legoTechnic42115Name, count = 1),
+            )
+        )
 
-    @Override
-    protected Object controller() {
-        return warehouseController;
+        val orderItem = OrderItems(
+            orderUid = orderUid,
+            state = OrderState.READY_FOR_DELIVERY,
+            items = items
+        )
+        orderItemsRepository.save(orderItem)
     }
 }

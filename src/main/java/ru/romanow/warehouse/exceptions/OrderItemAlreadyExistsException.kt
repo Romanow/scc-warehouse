@@ -1,8 +1,3 @@
-package ru.romanow.scc.warehouse.exceptions;
+package ru.romanow.warehouse.exceptions
 
-public class OrderItemAlreadyExistsException
-        extends RuntimeException {
-    public OrderItemAlreadyExistsException(String message) {
-        super(message);
-    }
-}
+class OrderItemAlreadyExistsException(message: String) : RuntimeException(message)

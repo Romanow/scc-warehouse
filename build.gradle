@@ -2,7 +2,6 @@ plugins {
     id "idea"
     id "jacoco"
     id "maven-publish"
-    id "com.jfrog.bintray" version "1.8.5"
     id "org.jetbrains.kotlin.jvm" version "1.5.21"
     id "org.jetbrains.kotlin.plugin.jpa" version "1.5.21"
     id "org.jetbrains.kotlin.plugin.spring" version "1.5.21"
@@ -58,25 +57,14 @@ publishing {
     }
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_TOKEN")
-    publications = ["stubs"]
-    publish = true
-    pkg {
-        repo = "scc-microservices"
-        name = "warehouse"
-    }
-}
-
 contracts {
     baseClassMappings {
-        baseClassMapping ".*items.*", "ru.romanow.scc.warehouse.web.BaseItemsControllerTest"
-        baseClassMapping ".*state.*", "ru.romanow.scc.warehouse.web.BaseStateControllerTest"
-        baseClassMapping ".*checkout.*", "ru.romanow.scc.warehouse.web.BaseCheckoutControllerTest"
-        baseClassMapping ".*takeItems.*", "ru.romanow.scc.warehouse.web.BaseTakeItemControllerTest"
+        baseClassMapping ".*items.*", "ru.romanow.warehouse.web.BaseItemsControllerTest"
+//        baseClassMapping ".*state.*", "ru.romanow.warehouse.web.BaseStateControllerTest"
+//        baseClassMapping ".*checkout.*", "ru.romanow.warehouse.web.BaseCheckoutControllerTest"
+//        baseClassMapping ".*takeItems.*", "ru.romanow.warehouse.web.BaseTakeItemControllerTest"
     }
-    basePackageForTests = "ru.romanow.scc.warehouse.web"
+    basePackageForTests = "ru.romanow.warehouse.web"
     testFramework = "JUNIT5"
 }
 
@@ -88,7 +76,6 @@ dependencies {
 
     implementation "org.postgresql:postgresql"
     implementation "org.flywaydb:flyway-core"
-    implementation "com.vladmihalcea:hibernate-types-52:$hibernateTypesVersion"
 
     implementation "org.springdoc:springdoc-openapi-ui:$openApiVersion"
     implementation "org.springdoc:springdoc-openapi-kotlin:$openApiVersion"
@@ -101,7 +88,6 @@ dependencies {
     implementation "org.apache.commons:commons-lang3:$commonsLangVersion"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
-    testImplementation "org.mockito:mockito-inline"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.cloud:spring-cloud-contract-spec"
     testImplementation "org.springframework.cloud:spring-cloud-contract-spec-kotlin"

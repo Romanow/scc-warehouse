@@ -1,17 +1,9 @@
-package ru.romanow.scc.warehouse.model;
+package ru.romanow.warehouse.model
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import java.util.*
 
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Accessors(chain = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ItemsFullInfoResponse
-        extends ItemsShortInfo {
-    private Integer count;
-}
+class ItemsFullInfoResponse(
+    val count: Int? = null,
+    itemUid: UUID? = null,
+    name: String? = null
+) : ItemsShortInfo(itemUid, name)

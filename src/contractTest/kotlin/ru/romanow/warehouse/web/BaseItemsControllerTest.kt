@@ -1,64 +1,22 @@
-package ru.romanow.scc.warehouse.web;
+package ru.romanow.warehouse.web
 
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import ru.romanow.scc.warehouse.model.ItemsFullInfoResponse;
-import ru.romanow.scc.warehouse.model.PageableItemsResponse;
-import ru.romanow.scc.warehouse.service.WarehouseService;
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
+import ru.romanow.warehouse.domain.Items
+import ru.romanow.warehouse.repository.ItemsRepository
 
-import java.util.List;
-import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.IntStream.range;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
-
-public class BaseItemsControllerTest
-        extends BaseWebTest {
-    private static final int LIST_SIZE = 6;
-    private static final List<ItemsFullInfoResponse> ITEMS =
-            range(0, LIST_SIZE)
-                    .mapToObj(BaseItemsControllerTest::buildItem)
-                    .collect(toList());
+class BaseItemsControllerTest : BaseContractTest() {
 
     @Autowired
-    private WarehouseController warehouseController;
-
-    @MockBean
-    private WarehouseService warehouseService;
+    private lateinit var itemsRepository: ItemsRepository
 
     @BeforeEach
-    public void init() {
-        when(warehouseService.items(anyInt(), anyInt())).thenAnswer((i) -> {
-            int page = i.getArgument(0);
-            int size = i.getArgument(1);
-            if (size == 0) {
-                size = ITEMS.size();
-            }
-            return buildItemsResponse(page, size);
-        });
-    }
-
-    @Override
-    protected Object controller() {
-        return warehouseController;
-    }
-
-    private PageableItemsResponse buildItemsResponse(int page, int size) {
-        final List<ItemsFullInfoResponse> items = ITEMS.subList(size * page, size * (page + 1));
-        return new PageableItemsResponse()
-                .setPage(page)
-                .setPageSize(size)
-                .setTotalSize(ITEMS.size())
-                .setItems(items);
-    }
-
-    private static ItemsFullInfoResponse buildItem(int i) {
-        final ItemsFullInfoResponse response = new ItemsFullInfoResponse(i + 1);
-        response.setItemUid(UUID.randomUUID());
-        response.setName("Lego Technic " + (42090 + i));
-        return response;
+    fun init() {
+        val items = listOf(
+            Items(uid = legoTechnic9398ItemUid, name = legoTechnic9398Name, count = 1),
+            Items(uid = legoTechnic42082ItemUid, name = legoTechnic42082Name, count = 2),
+            Items(uid = legoTechnic42115ItemUid, name = legoTechnic42115Name, count = 1),
+        )
+        itemsRepository.saveAll(items)
     }
 }

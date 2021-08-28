@@ -1,5 +1,5 @@
-package ru.romanow.scc.warehouse.domain.enums;
+package ru.romanow.warehouse.domain.enums
 
-public enum OrderState {
+enum class OrderState {
     CREATED, READY_FOR_DELIVERY
 }

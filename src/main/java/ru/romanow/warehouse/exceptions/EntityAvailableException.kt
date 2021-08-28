@@ -1,8 +1,3 @@
-package ru.romanow.scc.warehouse.exceptions;
+package ru.romanow.warehouse.exceptions
 
-public class EntityAvailableException
-        extends RuntimeException {
-    public EntityAvailableException(String message) {
-        super(message);
-    }
-}
+class EntityAvailableException(message: String) : RuntimeException(message)

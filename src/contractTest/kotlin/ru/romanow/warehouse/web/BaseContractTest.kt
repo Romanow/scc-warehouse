@@ -1,36 +1,39 @@
-package ru.romanow.scc.warehouse.web;
+package ru.romanow.warehouse.web
 
+import io.restassured.module.mockmvc.RestAssuredMockMvc
+import org.junit.Rule
+import org.junit.jupiter.api.BeforeEach
+import org.junit.rules.TestName
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.transaction.annotation.Transactional
+import ru.romanow.warehouse.config.DatabaseTestConfiguration
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.TestName;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
-
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
-@ExtendWith(SpringExtension.class)
-@WebMvcTest
-public abstract class BaseWebTest {
+@ActiveProfiles("test")
+@SpringBootTest
+@Transactional
+@AutoConfigureTestEntityManager
+@Import(DatabaseTestConfiguration::class)
+abstract class BaseContractTest {
 
     @Autowired
-    private ExceptionController exceptionController;
+    private lateinit var exceptionController: ExceptionController
+
+    @Autowired
+    private lateinit var warehouseController: WarehouseController
 
     @Rule
-    public TestName testName = new TestName();
+    var testName = TestName()
 
     @BeforeEach
-    public void mockMvcInit() {
-        StandaloneMockMvcBuilder standaloneMockMvcBuilder =
-                standaloneSetup(controller())
-                        .setControllerAdvice(exceptionController);
-
-        RestAssuredMockMvc.standaloneSetup(standaloneMockMvcBuilder);
+    fun mockMvcInit() {
+        val standaloneMockMvcBuilder = MockMvcBuilders
+            .standaloneSetup(warehouseController)
+            .setControllerAdvice(exceptionController)
+        RestAssuredMockMvc.standaloneSetup(standaloneMockMvcBuilder)
     }
-
-    protected abstract Object controller();
 }

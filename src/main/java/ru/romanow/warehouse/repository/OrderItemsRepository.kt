@@ -1,12 +1,9 @@
-package ru.romanow.scc.warehouse.repository;
+package ru.romanow.warehouse.repository
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import ru.romanow.scc.warehouse.domain.OrderItems;
+import org.springframework.data.jpa.repository.JpaRepository
+import ru.romanow.warehouse.domain.OrderItems
+import java.util.*
 
-import java.util.Optional;
-import java.util.UUID;
-
-public interface OrderItemsRepository
-        extends JpaRepository<OrderItems, Integer> {
-    Optional<OrderItems> findByOrderUid(UUID orderUid);
+interface OrderItemsRepository : JpaRepository<OrderItems, Int> {
+    fun findByOrderUid(orderUid: UUID): Optional<OrderItems>
 }

@@ -1,63 +1,59 @@
-package ru.romanow.scc.warehouse.domain;
+package ru.romanow.warehouse.domain
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import java.util.*
+import javax.persistence.*
 
-import javax.persistence.*;
-import java.util.List;
-import java.util.UUID;
-
-@Data
-@Accessors(chain = true)
 @Entity
-@Table(name = "items",
-        indexes = {
-                @Index(name = "idx_items_uid", columnList = "uid", unique = true),
-                @Index(name = "idx_items_name", columnList = "name", unique = true)
-        })
-public class Items {
-
+@Table(
+    name = "items",
+    indexes = [
+        Index(name = "idx_items_uid", columnList = "uid", unique = true),
+        Index(name = "idx_items_name", columnList = "name", unique = true)
+    ]
+)
+data class Items(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    var id: Int? = null,
 
     @Column(name = "uid", nullable = false, unique = true, updatable = false)
-    private UUID uid;
+    var uid: UUID? = null,
 
     @Column(name = "name", length = 1024, nullable = false, unique = true)
-    private String name;
+    var name: String? = null,
 
-    @Column(name = "count")
-    private Integer count;
+    @Column(name = "count", nullable = false)
+    var count: Int? = null,
 
     @ManyToMany(mappedBy = "items")
-    private List<OrderItems> orderItems;
-
-    public Integer decrementCount() {
-        return --count;
+    var orderItems: List<OrderItems>? = null,
+) {
+    fun decrementCount(): Int {
+        count = (count ?: 1) - 1
+        return count!!
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Items items = (Items) o;
-        return Objects.equal(name, items.name);
+    override fun toString(): String {
+        return "Items(id=$id, uid=$uid, name=$name, count=$count)"
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(name);
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Items
+
+        if (uid != other.uid) return false
+        if (name != other.name) return false
+        if (count != other.count) return false
+
+        return true
     }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("uid", uid)
-                .add("name", name)
-                .add("count", count)
-                .toString();
+    override fun hashCode(): Int {
+        var result = uid?.hashCode() ?: 0
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (count ?: 0)
+        return result
     }
 }

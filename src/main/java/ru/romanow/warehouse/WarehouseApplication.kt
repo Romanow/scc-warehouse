@@ -1,11 +1,11 @@
-package ru.romanow.scc.warehouse;
+package ru.romanow.warehouse
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-public class WarehouseApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(WarehouseApplication.class, args);
-    }
+class WarehouseApplication
+
+fun main(args: Array<String>) {
+    SpringApplication.run(WarehouseApplication::class.java, *args)
 }
