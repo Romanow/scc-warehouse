@@ -12,6 +12,7 @@ class BaseItemsControllerTest : BaseContractTest() {
 
     @BeforeEach
     fun init() {
+        itemsRepository.deleteAll()
         val items = listOf(
             Items(uid = legoTechnic9398ItemUid, name = legoTechnic9398Name, count = 1),
             Items(uid = legoTechnic42082ItemUid, name = legoTechnic42082Name, count = 2),

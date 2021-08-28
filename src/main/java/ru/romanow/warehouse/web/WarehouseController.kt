@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
@@ -36,7 +37,7 @@ class WarehouseController(
         ]
     )
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun items(@ParameterObject pageable: Pageable): PageableItemsResponse {
+    fun items(@ParameterObject @PageableDefault(100) pageable: Pageable): PageableItemsResponse {
         return warehouseService.items(pageable)
     }
 

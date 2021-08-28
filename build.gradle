@@ -2,9 +2,9 @@ plugins {
     id "idea"
     id "jacoco"
     id "maven-publish"
-    id "org.jetbrains.kotlin.jvm" version "1.5.21"
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.5.21"
-    id "org.jetbrains.kotlin.plugin.spring" version "1.5.21"
+    id "org.jetbrains.kotlin.jvm" version "1.4.10"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.10"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.4.10"
     id "org.springframework.boot" version "2.5.0"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
     id "org.springframework.cloud.contract" version "3.0.3"
@@ -60,9 +60,9 @@ publishing {
 contracts {
     baseClassMappings {
         baseClassMapping ".*items.*", "ru.romanow.warehouse.web.BaseItemsControllerTest"
-//        baseClassMapping ".*state.*", "ru.romanow.warehouse.web.BaseStateControllerTest"
-//        baseClassMapping ".*checkout.*", "ru.romanow.warehouse.web.BaseCheckoutControllerTest"
-//        baseClassMapping ".*takeItems.*", "ru.romanow.warehouse.web.BaseTakeItemControllerTest"
+        baseClassMapping ".*state.*", "ru.romanow.warehouse.web.BaseStateControllerTest"
+        baseClassMapping ".*checkout.*", "ru.romanow.warehouse.web.BaseCheckoutControllerTest"
+        baseClassMapping ".*takeItems.*", "ru.romanow.warehouse.web.BaseTakeItemControllerTest"
     }
     basePackageForTests = "ru.romanow.warehouse.web"
     testFramework = "JUNIT5"

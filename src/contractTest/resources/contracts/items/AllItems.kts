@@ -1,13 +1,13 @@
 import org.springframework.cloud.contract.spec.ContractDsl.Companion.contract
 import java.util.*
 
-val legoTechnic42082ItemUid: UUID = UUID.fromString("7CB34608-5E6B-4DAA-898A-60E256944DCD")
+val legoTechnic42082ItemUid: UUID = UUID.fromString("667c15c8-09eb-4a53-8d4c-69ce70ba2ba9")
 val legoTechnic42082Name: String = "Lego Technic 42082"
 
-val legoTechnic42115ItemUid: UUID = UUID.fromString("64A2CDBE-10F6-4668-A918-6AAAEFA258C5")
+val legoTechnic42115ItemUid: UUID = UUID.fromString("61b6fff3-6192-4488-8622-3bd6402ee49f")
 val legoTechnic42115Name: String = "Lego Technic 42115"
 
-val legoTechnic9398ItemUid: UUID = UUID.fromString("E3BC005E-93C4-4294-9A32-1D6EFD9262AA")
+val legoTechnic9398ItemUid: UUID = UUID.fromString("d01e5c08-df58-4540-833e-022ecd654802")
 val legoTechnic9398Name: String = "Lego Technic 9398"
 
 contract {

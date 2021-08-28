@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
@@ -34,6 +35,7 @@ abstract class BaseContractTest {
         val standaloneMockMvcBuilder = MockMvcBuilders
             .standaloneSetup(warehouseController)
             .setControllerAdvice(exceptionController)
+            .setCustomArgumentResolvers(PageableHandlerMethodArgumentResolver())
         RestAssuredMockMvc.standaloneSetup(standaloneMockMvcBuilder)
     }
 }

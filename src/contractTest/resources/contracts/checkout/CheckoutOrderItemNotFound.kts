@@ -4,7 +4,7 @@ import java.util.*
 val orderUid: UUID = UUID.fromString("36856fc6-d6ec-47cb-bbee-d20e78299eb9")
 
 contract {
-    description = "OrderItem not found"
+    description = "Order not found"
     request {
         url = url("/api/v1/items/$orderUid/checkout")
         method = POST

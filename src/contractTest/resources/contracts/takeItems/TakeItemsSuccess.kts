@@ -1,19 +1,22 @@
 import org.springframework.cloud.contract.spec.ContractDsl.Companion.contract
 import java.util.*
 
-val orderUid: UUID = UUID.fromString("3D8F39B4-02CA-44D7-A40D-8A2A5433400F")
+val orderUid: UUID = UUID.randomUUID()
 
-val legoTechnic42082ItemUid: UUID = UUID.fromString("7CB34608-5E6B-4DAA-898A-60E256944DCD")
+val legoTechnic42082ItemUid: String = "667c15c8-09eb-4a53-8d4c-69ce70ba2ba9"
 val legoTechnic42082Name: String = "Lego Technic 42082"
 
-val legoTechnic42115ItemUid: UUID = UUID.fromString("64A2CDBE-10F6-4668-A918-6AAAEFA258C5")
+val legoTechnic42115ItemUid: String = "61b6fff3-6192-4488-8622-3bd6402ee49f"
 val legoTechnic42115Name: String = "Lego Technic 42115"
 
 contract {
     description = "Take items (create OrderItem and decrement available items count)"
     request {
-        url = url("/api/v1/items/$orderUid/checkout")
+        url = url(value(client("/api/v1/items/$anyUuid/take"), server("/api/v1/items/$orderUid/take")))
         method = POST
+        headers {
+            header(CONTENT_TYPE, APPLICATION_JSON)
+        }
         body = body(
             mapOf(
                 "itemsUid" to value(
@@ -24,13 +27,13 @@ contract {
         )
     }
     response {
-        status = OK
+        status = CREATED
         headers {
             header(CONTENT_TYPE, APPLICATION_JSON)
         }
         body = body(
             mapOf(
-                "orderUid" to orderUid,
+                "orderUid" to fromRequest().path(3),
                 "state" to "CREATED",
                 "items" to listOf(
                     mapOf(

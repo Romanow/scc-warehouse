@@ -9,12 +9,12 @@ import ru.romanow.warehouse.domain.Items
 import ru.romanow.warehouse.domain.OrderItems
 import ru.romanow.warehouse.domain.enums.OrderState
 import ru.romanow.warehouse.exceptions.EntityAvailableException
+import ru.romanow.warehouse.exceptions.EntityNotFoundException
 import ru.romanow.warehouse.exceptions.OrderItemAlreadyExistsException
 import ru.romanow.warehouse.model.*
 import ru.romanow.warehouse.repository.ItemsRepository
 import ru.romanow.warehouse.repository.OrderItemsRepository
 import java.util.*
-import javax.persistence.EntityNotFoundException
 
 @Service
 class WarehouseServiceImpl(
@@ -33,10 +33,11 @@ class WarehouseServiceImpl(
     override fun items(pageable: Pageable): PageableItemsResponse {
         val items = itemsRepository
             .findAll({ root, query, criteriaBuilder -> criteriaBuilder.greaterThan(root.get("count"), 0) }, pageable)
+        val totalSize = items.totalElements.toInt()
         return PageableItemsResponse(
             page = pageable.pageNumber,
-            pageSize = pageable.pageSize,
-            totalSize = items.totalElements.toInt(),
+            pageSize = if (pageable.pageSize < totalSize) pageable.pageSize else totalSize,
+            totalSize = totalSize,
             items = items.content.map { buildItemsFullInfoResponse(it) }
         )
     }
@@ -59,7 +60,7 @@ class WarehouseServiceImpl(
         }
         val absentItems = items.filter { it.count == 0 }
         if (absentItems.isNotEmpty()) {
-            throw EntityAvailableException("Items [${on(",").join(absentItems)}] is empty (available count = 0)")
+            throw EntityAvailableException("Items ${absentItems.map { it.uid }} is empty (available count = 0)")
         }
         var orderItems = OrderItems(
             state = OrderState.CREATED,

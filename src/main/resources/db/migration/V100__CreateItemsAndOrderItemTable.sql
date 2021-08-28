@@ -13,7 +13,8 @@ CREATE UNIQUE INDEX idx_items_name ON items (name);
 CREATE TABLE order_items
 (
     id        SERIAL PRIMARY KEY,
-    order_uid uuid NOT NULL
+    order_uid uuid NOT NULL,
+    state     VARCHAR
 );
 
 CREATE UNIQUE INDEX idx_order_items_order_uid ON order_items (order_uid);
@@ -26,5 +27,5 @@ CREATE TABLE order_items_cross
         CONSTRAINT fk_order_items_cross_order_item_id REFERENCES order_items (id)
 );
 
-CREATE UNIQUE INDEX idx_order_items_cross_order_item_id ON order_items_cross(order_item_id);
-CREATE UNIQUE INDEX idx_order_items_cross_items_id ON order_items_cross(items_id);
+CREATE UNIQUE INDEX idx_order_items_cross_order_item_id ON order_items_cross (order_item_id);
+CREATE UNIQUE INDEX idx_order_items_cross_items_id ON order_items_cross (items_id);
