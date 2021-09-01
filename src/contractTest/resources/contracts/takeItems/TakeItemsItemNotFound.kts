@@ -1,12 +1,12 @@
 import org.springframework.cloud.contract.spec.ContractDsl.Companion.contract
 import java.util.*
 
-val orderUid: UUID = UUID.randomUUID()
+val orderUid: UUID = UUID.fromString("47940b20-28f6-44ff-9ac1-47dfcc1db76c")
 
 contract {
     description = "Requested items not found"
     request {
-        url = url(value(client("/api/v1/items/$anyUuid/take"), server("/api/v1/items/$orderUid/take")))
+        url = url("/api/v1/items/$orderUid/take")
         method = POST
         headers {
             header(CONTENT_TYPE, APPLICATION_JSON)

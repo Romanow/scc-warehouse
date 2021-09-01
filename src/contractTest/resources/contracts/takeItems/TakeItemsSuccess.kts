@@ -12,17 +12,19 @@ val legoTechnic42115Name: String = "Lego Technic 42115"
 contract {
     description = "Take items (create OrderItem and decrement available items count)"
     request {
-        url = url(value(client("/api/v1/items/$anyUuid/take"), server("/api/v1/items/$orderUid/take")))
+        url = url(
+            value(
+                consumer(regex("\\/api\\/v1\\/items\\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\/take")),
+                producer("/api/v1/items/$orderUid/take")
+            )
+        )
         method = POST
         headers {
             header(CONTENT_TYPE, APPLICATION_JSON)
         }
         body = body(
             mapOf(
-                "itemsUid" to value(
-                    server(listOf(legoTechnic42082ItemUid, legoTechnic42115ItemUid)),
-                    client(listOf(anyUuid, anyUuid))
-                )
+                "itemsUid" to listOf(legoTechnic42082ItemUid, legoTechnic42115ItemUid)
             )
         )
     }
