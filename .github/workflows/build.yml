@@ -18,4 +18,4 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           dependencies-cache-enabled: true
-          arguments: clean build publish
+          arguments: clean build

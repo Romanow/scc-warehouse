@@ -10,7 +10,7 @@ plugins {
     id "org.springframework.cloud.contract" version "3.0.3"
 }
 
-[compileKotlin, compileTestKotlin]*.kotlinOptions *.jvmTarget = "11"
+[compileKotlin, compileTestKotlin]*.kotlinOptions*.jvmTarget = "11"
 
 ext {
     springCloudVersion = "3.0.3"
@@ -81,11 +81,7 @@ publishing {
                 password = System.getenv("ARTIFACTORY_PASSWORD")
             }
 
-            if (project.version.endsWith("-SNAPSHOT")) {
-                url = "https://romanow.jfrog.io/artifactory/scc-libs-snapshot/"
-            } else {
-                url = "https://romanow.jfrog.io/artifactory/scc-libs-release/"
-            }
+            url = "https://romanow.jfrog.io/artifactory/scc-libs-release/"
         }
     }
 }
