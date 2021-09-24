@@ -2,9 +2,9 @@ plugins {
     id "idea"
     id "jacoco"
     id "maven-publish"
-    id "org.jetbrains.kotlin.jvm" version "1.4.10"
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.10"
-    id "org.jetbrains.kotlin.plugin.spring" version "1.4.10"
+    id "org.jetbrains.kotlin.jvm" version "1.5.10"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.5.10"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.5.10"
     id "org.springframework.boot" version "2.5.0"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
     id "org.springframework.cloud.contract" version "3.0.3"
@@ -14,6 +14,7 @@ plugins {
 
 ext {
     springCloudVersion = "3.0.3"
+    kotlinVersion = "1.5.10"
     gsonVersion = "2.8.7"
     guavaVersion = "30.1.1-jre"
     openApiVersion = "1.5.10"
@@ -120,6 +121,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.cloud:spring-cloud-contract-spec"
     testImplementation "org.springframework.cloud:spring-cloud-contract-spec-kotlin"
+    testImplementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion"
     testImplementation "org.springframework.cloud:spring-cloud-starter-contract-verifier"
     testImplementation "org.testcontainers:postgresql:$postgresContainerVersion"
 }
