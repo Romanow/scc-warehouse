@@ -1,4 +1,5 @@
 import org.springframework.cloud.contract.spec.ContractDsl.Companion.contract
+import ru.romanow.warehouse.extensions.ConsumerUtils
 import java.util.*
 
 val orderUid: UUID = UUID.randomUUID()
@@ -39,11 +40,11 @@ contract {
                 "state" to "CREATED",
                 "items" to listOf(
                     mapOf(
-                        "name" to legoTechnic42082Name,
+                        "name" to ConsumerUtils.anyLegoTechnic(),
                         "itemUid" to fromRequest().body("$.itemsUid[0]")
                     ),
                     mapOf(
-                        "name" to legoTechnic42115Name,
+                        "name" to ConsumerUtils.anyLegoTechnic(),
                         "itemUid" to fromRequest().body("$.itemsUid[1]")
                     )
                 )

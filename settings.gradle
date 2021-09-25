@@ -1,1 +1,3 @@
 rootProject.name = "scc-warehouse"
+
+include "extensions"

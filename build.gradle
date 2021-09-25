@@ -124,6 +124,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion"
     testImplementation "org.springframework.cloud:spring-cloud-starter-contract-verifier"
     testImplementation "org.testcontainers:postgresql:$postgresContainerVersion"
+    testImplementation project(":extensions")
 }
 
 test {

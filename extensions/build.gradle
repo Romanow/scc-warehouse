@@ -1,0 +1,26 @@
+plugins {
+    id "idea"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.plugin.jpa"
+    id "org.jetbrains.kotlin.plugin.spring"
+    id "io.spring.dependency-management"
+}
+
+[compileKotlin, compileTestKotlin]*.kotlinOptions*.jvmTarget = "11"
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-contract-dependencies:$springCloudVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.springframework.cloud:spring-cloud-contract-spec"
+    implementation "org.springframework.cloud:spring-cloud-contract-spec-kotlin"
+}
