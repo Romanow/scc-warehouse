@@ -10,6 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 typealias CustomPostgresContainer = PostgreSQLContainer<*>
 
+
 @TestConfiguration
 class DatabaseTestConfiguration {
     companion object {
